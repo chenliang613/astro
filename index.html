@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Astro by HuaweiBigData</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Astro</h1>
+      <h2 class="project-tagline">High performance SQL layer over HBase by using Spark SQL framework</h2>
+      <a href="https://github.com/HuaweiBigData/astro" class="btn">View on GitHub</a>
+      <a href="https://github.com/HuaweiBigData/astro/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/HuaweiBigData/astro/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h2>
+<a id="astro-fast-sql-on-hbase-using-sparksql" class="anchor" href="#astro-fast-sql-on-hbase-using-sparksql" aria-hidden="true"><span class="octicon octicon-link"></span></a>Astro: Fast SQL on HBase using SparkSQL</h2>
+
+<p>Astro is fully distributed SQL engine on HBase by leveraging Spark ecosystem. It enables systematic and powerful handling of data pruning, intelligent scan, and pushdowns like custom filters and coprocessor, and make more traditional RDBS capabilities possible.</p>
+
+<h2>
+<a id="requirements" class="anchor" href="#requirements" aria-hidden="true"><span class="octicon octicon-link"></span></a>Requirements</h2>
+
+<p>This version of 1.0.0 requires Spark 1.4.0,HBase 0.98</p>
+
+<h2>
+<a id="building-spark-hbase" class="anchor" href="#building-spark-hbase" aria-hidden="true"><span class="octicon octicon-link"></span></a>Building Spark HBase</h2>
+
+<p>Spark HBase is built using <a href="http://maven.apache.org/">Apache Maven</a>.</p>
+
+<p>I. Clone and build HuaweiBigData/astro</p>
+
+<pre><code>$ git clone https://github.com/HuaweiBigData/astro
+</code></pre>
+
+<p>II. Go to the root of the source tree</p>
+
+<pre><code>$ cd astro
+</code></pre>
+
+<p>III. Build the project
+Build without testing</p>
+
+<pre><code>$ mvn -DskipTests clean install 
+</code></pre>
+
+<p>Or, build with testing. It will run test suites against a HBase minicluster.</p>
+
+<pre><code>$ mvn clean install
+</code></pre>
+
+<h2>
+<a id="activate-coprocessor-and-custom-filter-in-hbase" class="anchor" href="#activate-coprocessor-and-custom-filter-in-hbase" aria-hidden="true"><span class="octicon octicon-link"></span></a>Activate Coprocessor and Custom Filter in HBase</h2>
+
+<p>First, add the path of spark-hbase jar to the hbase-env.sh in $HBASE_HOME/conf directory, as follows:</p>
+
+<pre><code>HBASE_CLASSPATH=$HBASE_CLASSPATH:/spark-hbase-root-dir/target/spark-sql-on-hbase-1.0.0.jar
+</code></pre>
+
+<p>Then, register the coprocessor service 'CheckDirEndPoint' to hbase-site.xml in the same directory, as follows:</p>
+
+<pre><code>&lt;property&gt;
+    &lt;name&gt;hbase.coprocessor.region.classes&lt;/name&gt;
+    &lt;value&gt;org.apache.spark.sql.hbase.CheckDirEndPointImpl&lt;/value&gt;
+&lt;/property&gt;
+</code></pre>
+
+<p>(Warning: Don't register another coprocessor service 'SparkSqlRegionObserver' here !)</p>
+
+<h2>
+<a id="interactive-scala-shell" class="anchor" href="#interactive-scala-shell" aria-hidden="true"><span class="octicon octicon-link"></span></a>Interactive Scala Shell</h2>
+
+<p>The easiest way to start using Spark HBase is through the Scala shell:</p>
+
+<pre><code>./bin/hbase-sql
+</code></pre>
+
+<h2>
+<a id="python-shell" class="anchor" href="#python-shell" aria-hidden="true"><span class="octicon octicon-link"></span></a>Python Shell</h2>
+
+<p>First, add the spark-hbase jar to the SPARK_CLASSPATH in the $SPARK_HOME/conf directory, as follows:</p>
+
+<pre><code>SPARK_CLASSPATH=$SPARK_CLASSPATH:/spark-hbase-root-dir/target/spark-sql-on-hbase-1.0.0.jar
+</code></pre>
+
+<p>Then go to the spark-hbase installation directory and issue</p>
+
+<pre><code>./bin/pyspark-hbase
+</code></pre>
+
+<p>A successfull message is as follows:</p>
+
+<p>You are using Spark SQL on HBase!!!
+   HBaseSQLContext available as hsqlContext.</p>
+
+<p>To run a python script, the PYTHONPATH environment should be set to the "python" directory of the Spark-HBase installation. For example,</p>
+
+<pre><code>export PYTHONPATH=/root-of-Spark-HBase/python
+</code></pre>
+
+<p>Note that the shell commands are not included in the Zip file of the Spark release. They are for developers' use only for this version of 1.0.0. Instead, users can use "$SPARK_HOME/bin/spark-shell --packages Huawei-Spark/Spark-SQL-on-HBase:1.0.0" for SQL shell or "$SPARK_HOME/bin/pyspark --packages Huawei-Spark/Spark-SQL-on-HBase:1.0.0" for Pythin shell.</p>
+
+<h2>
+<a id="running-tests" class="anchor" href="#running-tests" aria-hidden="true"><span class="octicon octicon-link"></span></a>Running Tests</h2>
+
+<p>Testing first requires <a href="#building-spark-hbase">building Spark HBase</a>. Once Spark HBase is built ...</p>
+
+<p>Run all test suites from Maven:</p>
+
+<pre><code>mvn -Phbase,hadoop-2.4 test
+</code></pre>
+
+<p>Run a single test suite from Maven, for example:</p>
+
+<pre><code>mvn -Phbase,hadoop-2.4 test -DwildcardSuites=org.apache.spark.sql.hbase.BasicQueriesSuite
+</code></pre>
+
+<h2>
+<a id="ide-setup" class="anchor" href="#ide-setup" aria-hidden="true"><span class="octicon octicon-link"></span></a>IDE Setup</h2>
+
+<p>We use IntelliJ IDEA for Spark HBase development. You can get the community edition for free and install the JetBrains Scala plugin from Preferences &gt; Plugins.</p>
+
+<p>To import the current Spark HBase project for IntelliJ:</p>
+
+<ol>
+<li>Download IntelliJ and install the Scala plug-in for IntelliJ. You may also need to install Maven plug-in for IntelliJ.</li>
+<li>Go to "File -&gt; Import Project", locate the Spark HBase source directory, and select "Maven Project".</li>
+<li>In the Import Wizard, select "Import Maven projects automatically" and leave other settings at their default. </li>
+<li>Make sure some specific profiles are enabled. Select corresponding Hadoop version, "maven3" and also"hbase" in order to get dependencies.</li>
+<li>Leave other settings at their default and you should be able to start your development.</li>
+<li>When you run the scala test, sometimes you will get out of memory exception. You can increase your VM memory usage by the following setting, for example:</li>
+</ol>
+
+<pre><code>-XX:MaxPermSize=512m -Xmx3072m
+</code></pre>
+
+<p>You can also make those setting to be the default by setting to the "Defaults -&gt; ScalaTest".</p>
+
+<h2>
+<a id="configuration" class="anchor" href="#configuration" aria-hidden="true"><span class="octicon octicon-link"></span></a>Configuration</h2>
+
+<p>Please refer to the <a href="http://spark.apache.org/docs/latest/configuration.html">Configuration guide</a>
+in the online documentation for an overview on how to configure Spark.</p>
+
+<h2>
+<a id="fork-and-contribute" class="anchor" href="#fork-and-contribute" aria-hidden="true"><span class="octicon octicon-link"></span></a>Fork and Contribute</h2>
+
+<p>This is an 100% open source project, we are always open to people who want to use the system or contribute to it. 
+This guide document introduce <a href="https://github.com/HuaweiBigData/astro/wiki/How-to-contribute-to-Astro">how to contribute to Astro</a>.</p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/HuaweiBigData/astro">Astro</a> is maintained by <a href="https://github.com/HuaweiBigData">HuaweiBigData</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
